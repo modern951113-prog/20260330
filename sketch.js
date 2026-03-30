@@ -205,17 +205,18 @@ function drawGameScreen() {
   // 3. 繪製起點與終點區域
   let startPt = pathPoints[0];
   let endPt = pathPoints[pathPoints.length - 1];
+  let terminalSize = 150; // 為起點與終點設定一個固定的、較大的尺寸
 
   noStroke();
   fill(0, 255, 0, 180); // 起點綠色
-  circle(startPt.x, startPt.y, pathWidth);
+  circle(startPt.x, startPt.y, terminalSize);
   
   fill(255, 0, 0, 180); // 終點紅色
-  circle(endPt.x, endPt.y, pathWidth);
+  circle(endPt.x, endPt.y, terminalSize);
 
   // 標示文字
   fill(0);
-  textSize(20);
+  textSize(48); // 加大起點與終點的文字，讓畫面更有氣勢
   textAlign(CENTER, CENTER);
   text("人間", startPt.x, startPt.y);
   text("地獄", endPt.x, endPt.y);
@@ -266,7 +267,7 @@ function drawGameScreen() {
     circle(mouseX, mouseY, 12);
 
     // 檢查是否到達終點 (地獄)
-    if (dist(mouseX, mouseY, endPt.x, endPt.y) < pathWidth / 2) {
+    if (dist(mouseX, mouseY, endPt.x, endPt.y) < terminalSize / 2) {
       isTracing = false;
       if (selectedDifficulty !== "?") {
         completedLevels[selectedDifficulty] = true; // 標記為已通關
@@ -358,9 +359,9 @@ function generateLevel(difficulty) {
     noiseScale = 0.05;
     amplitude = height * 0.65;
   } else if (difficulty === "?") {
-    pathWidth = 4; // 極端狹窄 (比游標還小)，正常人絕對過不了
-    noiseScale = 0.2; // 瘋狂且不規則的折彎
-    amplitude = height * 1.5; // 超出螢幕範圍的極端起伏
+    pathWidth = 16; // 加寬至比游標(12)稍微大一點點，給玩家「極限操作或許能過」的錯覺
+    noiseScale = 0.12; // 稍微平滑化折彎，讓軌道看起來像是一條真實存在的高難度迷宮
+    amplitude = height * 1.2; // 保留誇張的上下起伏，增加視覺壓迫感
   }
 
   for (let i = 0; i <= numPoints; i++) {
@@ -493,7 +494,11 @@ function submitName() {
   }
   playerNameInput.hide(); // 隱藏輸入框
   playerNameButton.hide(); // 隱藏按鈕
-  gameState = "difficulty"; // 進入難度選擇畫面
+  
+  // 加入微小的延遲，避免點擊按鈕的事件穿透到畫布上而瞬間觸發難度選擇
+  setTimeout(() => {
+    gameState = "difficulty"; // 進入難度選擇畫面
+  }, 50);
 }
 
 // 處理滑鼠點擊事件
@@ -544,8 +549,9 @@ function mousePressed() {
       }
     }
   } else if (gameState === "playing") {
+    let terminalSize = 150; // 起點與終點的點擊區域大小
     // 若在遊戲中點擊，判斷是否在「人間」區域內以啟動遊戲
-    if (!isTracing && dist(mouseX, mouseY, pathPoints[0].x, pathPoints[0].y) < pathWidth / 2) {
+    if (!isTracing && dist(mouseX, mouseY, pathPoints[0].x, pathPoints[0].y) < terminalSize / 2) {
       isTracing = true; // 正式開始闖關
       startTime = millis(); // 記錄開始時間
     }
